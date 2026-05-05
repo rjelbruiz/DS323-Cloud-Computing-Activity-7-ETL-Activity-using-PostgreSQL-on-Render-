@@ -3,12 +3,15 @@ from sqlalchemy import create_engine
 
 def clean_data(db_url):
     engine = create_engine(db_url)
-    # Pull from Postgres staging instead of SQLite
-    df = pd.read_sql("SELECT * FROM staging_japan_sales_data", engine)
     
-    # Perform your cleaning (whitespace, date conversion, etc.)
-    df['date'] = pd.to_datetime(df['date'])
+    # Clean Japan Data
+    df_jp = pd.read_sql("SELECT * FROM staging_japan_sales", engine)
+    df_jp['date'] = pd.to_datetime(df_jp['date'])
+    df_jp.to_sql("japan_cleaned", engine, if_exists='replace', index=False)
     
-    # Save back to Postgres
-    df.to_sql("japan_sales_cleaned", engine, if_exists='replace', index=False)
-    return "Transformation Complete"
+    # Clean Myanmar Data
+    df_mm = pd.read_sql("SELECT * FROM staging_myanmar_sales", engine)
+    df_mm['date'] = pd.to_datetime(df_mm['date'])
+    df_mm.to_sql("myanmar_cleaned", engine, if_exists='replace', index=False)
+    
+    return "✨ Transformation Successful"
